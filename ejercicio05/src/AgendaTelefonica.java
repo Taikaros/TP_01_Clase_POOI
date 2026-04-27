@@ -93,10 +93,6 @@
  * Creacion dinamica de arrays de resultado
  * Gestion de estado compleja
  * */
-/**
- * Trabajo Práctico N° 1 - Programación Orientada a Objetos I
- * Ejercicio 5: Agenda Telefónica
- */
 
 public class AgendaTelefonica {
     
