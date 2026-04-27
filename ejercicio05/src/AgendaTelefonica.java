@@ -93,7 +93,210 @@
  * Creacion dinamica de arrays de resultado
  * Gestion de estado compleja
  * */
+/**
+ * Trabajo Práctico N° 1 - Programación Orientada a Objetos I
+ * Ejercicio 5: Agenda Telefónica
+ */
+
 public class AgendaTelefonica {
     
+    // --- Constante ---
+    private static final int CAPACIDAD_MAXIMA = 10; [cite: 204]
 
+    // --- Atributos privados ---
+    private Contacto[] contactos; [cite: 206]
+    private int cantidadContactos; [cite: 207]
+
+    // --- Constructor ---
+    public AgendaTelefonica() {
+        this.contactos = new Contacto[CAPACIDAD_MAXIMA]; [cite: 210]
+        this.cantidadContactos = 0; [cite: 211]
+    }
+
+    // --- Clase interna Contacto --- [cite: 191]
+    private class Contacto {
+        private String nombre; [cite: 193]
+        private String telefono; [cite: 194]
+
+        public Contacto(String nombre, String telefono) {
+            this.nombre = nombre;
+            this.telefono = telefono;
+        }
+
+        public String getNombre() { return nombre; }
+        public String getTelefono() { return telefono; }
+
+        public void setTelefono(String telefono) {
+            // Solo actualiza si cumple la validación [cite: 199]
+            if (validarTelefono(telefono)) {
+                this.telefono = telefono;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Nombre: " + nombre + " | Teléfono: " + telefono; [cite: 199]
+        }
+    }
+
+    // --- Validaciones y Utilidades ---
+    
+    private boolean validarTelefono(String telefono) {
+        // Debe tener 10 caracteres y ser todos dígitos [cite: 201]
+        return telefono != null && telefono.length() == 10 && telefono.matches("\\d+");
+    }
+
+    public boolean estaLlena() {
+        return cantidadContactos == CAPACIDAD_MAXIMA; [cite: 238]
+    }
+
+    public int obtenerCantidad() {
+        return cantidadContactos; [cite: 240]
+    }
+
+    public int obtenerEspaciosDisponibles() {
+        return CAPACIDAD_MAXIMA - cantidadContactos; [cite: 242]
+    }
+
+    // --- Operaciones CRUD ---
+
+    // 1. CREAR (Agregar)
+    public boolean agregarContacto(String nombre, String telefono) {
+        // Validar espacio, existencia previa y formato de teléfono [cite: 215, 216, 217]
+        if (estaLlena()) return false;
+        if (buscarPorNombre(nombre) != null) return false;
+        if (!validarTelefono(telefono)) return false;
+
+        contactos[cantidadContactos] = new Contacto(nombre, telefono);
+        cantidadContactos++;
+        return true; [cite: 218]
+    }
+
+    // 2. LEER (Buscar)
+    public Contacto buscarPorNombre(String nombre) {
+        for (int i = 0; i < cantidadContactos; i++) {
+            // Comparación sin distinguir mayúsculas/minúsculas [cite: 222]
+            if (contactos[i].getNombre().equalsIgnoreCase(nombre)) {
+                return contactos[i];
+            }
+        }
+        return null; [cite: 223]
+    }
+
+    public Contacto buscarPorTelefono(String telefono) {
+        for (int i = 0; i < cantidadContactos; i++) {
+            if (contactos[i].getTelefono().equals(telefono)) {
+                return contactos[i];
+            }
+        }
+        return null; [cite: 224]
+    }
+
+    public String[] buscarPorNombreParcial(String prefijo) {
+        // Contar coincidencias para el tamaño del array [cite: 226]
+        int contador = 0;
+        for (int i = 0; i < cantidadContactos; i++) {
+            if (contactos[i].getNombre().toLowerCase().contains(prefijo.toLowerCase())) {
+                contador++;
+            }
+        }
+
+        String[] resultados = new String[contador];
+        int idx = 0;
+        for (int i = 0; i < cantidadContactos; i++) {
+            if (contactos[i].getNombre().toLowerCase().contains(prefijo.toLowerCase())) {
+                resultados[idx++] = contactos[i].getNombre();
+            }
+        }
+        return resultados; [cite: 226]
+    }
+
+    // 3. ACTUALIZAR
+    public boolean actualizarTelefono(String nombre, String nuevoTelefono) {
+        Contacto c = buscarPorNombre(nombre); [cite: 229]
+        if (c != null && validarTelefono(nuevoTelefono)) { [cite: 230]
+            c.setTelefono(nuevoTelefono);
+            return true;
+        }
+        return false;
+    }
+
+    // 4. ELIMINAR (con compactación)
+    public boolean eliminarContacto(String nombre) {
+        for (int i = 0; i < cantidadContactos; i++) {
+            if (contactos[i].getNombre().equalsIgnoreCase(nombre)) { [cite: 233]
+                // Reordenar para no dejar huecos [cite: 234]
+                for (int j = i; j < cantidadContactos - 1; j++) {
+                    contactos[j] = contactos[j + 1];
+                }
+                contactos[cantidadContactos - 1] = null;
+                cantidadContactos--;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void listarContactos() {
+        if (cantidadContactos == 0) {
+            System.out.println("La agenda está vacía.");
+        } else {
+            for (int i = 0; i < cantidadContactos; i++) {
+                System.out.println(contactos[i]); [cite: 236]
+            }
+        }
+    }
+
+    // --- Método MAIN para pruebas --- [cite: 243]
+    public static void main(String[] args) {
+        AgendaTelefonica agenda = new AgendaTelefonica();
+
+        System.out.println("--- PRUEBAS DE AGENDA ---");
+
+        // 1. Agregar contactos válidos [cite: 245]
+        agenda.agregarContacto("Maria Lopez", "1122334455");
+        agenda.agregarContacto("Carlos Gomez", "2233445566");
+        agenda.agregarContacto("Juan Perez", "3344556677");
+
+        // 2. Intento de teléfono inválido [cite: 246]
+        System.out.println("Agregar 'Test' (9 dígitos): " + agenda.agregarContacto("Test", "123456789"));
+
+        // 3. Intento de nombre duplicado [cite: 247]
+        System.out.println("Agregar 'MARIA LOPEZ' (duplicado): " + agenda.agregarContacto("MARIA LOPEZ", "9999999999"));
+
+        // 4. Listar [cite: 249]
+        System.out.println("\nLista actual:");
+        agenda.listarContactos();
+
+        // 5. Buscar por nombre [cite: 250]
+        System.out.println("\nBuscando 'carlos gomez': " + agenda.buscarPorNombre("carlos gomez"));
+
+        // 7. Actualizar teléfono [cite: 252]
+        agenda.actualizarTelefono("Juan Perez", "1010101010");
+        System.out.println("Juan Perez actualizado: " + agenda.buscarPorNombre("Juan Perez"));
+
+        // 9. Búsqueda parcial [cite: 254]
+        System.out.println("\nBúsqueda parcial con 'ar':");
+        for (String n : agenda.buscarPorNombreParcial("ar")) {
+            System.out.println("- " + n);
+        }
+
+        // 10. Estadísticas [cite: 255]
+        System.out.println("\nEstadísticas:");
+        System.out.println("Cantidad: " + agenda.obtenerCantidad());
+        System.out.println("Espacios libres: " + agenda.obtenerEspaciosDisponibles());
+
+        // 11 y 12. Eliminar y listar [cite: 256, 257]
+        System.out.println("\nEliminando a 'CARLOS GOMEZ'...");
+        agenda.eliminarContacto("CARLOS GOMEZ");
+        agenda.listarContactos();
+        
+        // 13 y 14. Llenar la agenda [cite: 258, 259]
+        System.out.println("\nLlenando agenda...");
+        for (int i = 0; i < 9; i++) {
+            agenda.agregarContacto("Contacto" + i, "000000000" + i);
+        }
+        System.out.println("¿Está llena?: " + agenda.estaLlena());
+        System.out.println("Intento agregar uno extra: " + agenda.agregarContacto("Extra", "1234567890"));
+    }
 }
