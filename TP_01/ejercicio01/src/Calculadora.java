@@ -35,7 +35,7 @@ public class Calculadora
 
     public static long calcularFactorial(int a)
     {
-        if (a < 0)
+        if (a <= 0)
         {
             return 1; // error
         } else
